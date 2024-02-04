@@ -32,12 +32,6 @@ const createAUser = async (req, res) => {
     // GENARTE TOKEN
     const token = crypto.randomBytes(32).toString("hex");
 
-    //DEFAULT PHOTO
-    const photo = {
-      data: [],
-      contentType: "",
-    };
-
     // USER DATA FOR DATABASE
     const userData = {
       firstName,
@@ -45,7 +39,6 @@ const createAUser = async (req, res) => {
       email,
       password: newPassword,
       confirmToken: token,
-      photo,
     };
 
     // save user to database
@@ -69,7 +62,7 @@ const createAUser = async (req, res) => {
         html: `
           <html>
           <body>
-          <h1>Wellcome to Open Mart</h1>
+          <h1>Wellcome to Ebook</h1>
           <a href='http://localhost:5000/api/v1/user/confirm/${token}'>Confirm your email</a>
           </body>
           </html>
@@ -223,7 +216,6 @@ const userLogIn = async (req, res) => {
       phone: user.phone,
       role: user.role,
       address: user.address,
-      isProfilePhoto: user.isProfilePhoto,
     };
 
     res.status(200).json({
@@ -262,10 +254,14 @@ const updateUserProfile = async (req, res) => {
     }
 
     // UPDATE USER DATA
-    user.firstName = userData.firstName;
-    user.lastName = userData.lastName;
-    user.phone = userData.phone;
-    user.address = userData.address;
+    user.firstName = userData?.firstName;
+    user.lastName = userData?.lastName;
+    user.address = {
+      address: userData.address,
+      city: userData.city,
+      country: userData.country,
+      zipCode: userData.zipCode,
+    };
 
     // UPDATE USER
     const result = await User.updateOne(query, { $set: user });
@@ -367,6 +363,47 @@ const getAllUser = async (req, res) => {
   }
 };
 
+const changeUserPassword = async (req, res) => {
+  try {
+    // GET USER DATA
+    const { newPassword, confirmPassword, email } = req.body;
+    const user = req.user;
+
+    // MATCH PASSWORD
+    if (newPassword != confirmPassword) {
+      return res.status(400).json({
+        status: "fail",
+        message: "confirm password don't match",
+      });
+    }
+
+    // ENCRYPT PASSWORD
+    const hashPassword = (password) => {
+      const solt = 10;
+      const hashPassword = bcrypt.hash(password, solt);
+      return hashPassword;
+    };
+    const encryptdPassword = await hashPassword(newPassword);
+
+    // SET UPDATE USER DATA
+    user.password = encryptdPassword;
+
+    // UPDATE PASSWORD
+    const result = await User.updateOne({ email }, { $set: user });
+
+    // SEND RES
+    res.status(200).json({
+      status: "success",
+      result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      error: error.message,
+    });
+  }
+};
+
 export {
   createAUser,
   confirmUserEmail,
@@ -376,4 +413,5 @@ export {
   updateUserProfilePhoto,
   getAllUser,
   getProfilePhoto,
+  changeUserPassword,
 };

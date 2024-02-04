@@ -33,7 +33,7 @@ const userSchema = mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "writer", "admin"],
+      enum: ["user", "admin"],
       default: "user",
     },
     status: {
@@ -46,18 +46,15 @@ const userSchema = mongoose.Schema(
       required: [true, "please provide a password"],
     },
     address: {
-      type: String,
-      default: "",
-    },
-    photo: {
-      data: Buffer,
-      contentType: String,
+      type: Object,
+      default: {
+        adddress: "",
+        city: "",
+        country: "",
+        zipCode: "",
+      },
     },
     confirmToken: String,
-    isProfilePhoto: {
-      type: Boolean,
-      default: false,
-    },
   },
   {
     timeStamps: true,
