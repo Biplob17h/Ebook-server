@@ -6,10 +6,11 @@ const createAProduct = async (req, res) => {
   try {
     // GET PRODUCT DATA
     const { photo } = req.files;
-    const { name, price, discount, description, productLink } = req.fields;
+    const { name,writer, price, discount, description, productLink } = req.fields;
     // CREATE PRODUCT
     const productData = {
       name,
+      writer,
       price,
       discount,
       description,
@@ -101,6 +102,83 @@ const getSingleProduct = async (req, res) => {
   }
 };
 
+const updateProduct = async (req, res) => {
+  try {
+    const { _id, name,writer, price, discount, productLink, description } = req.body;
 
+    // FIND PRODUCT
+    const product = await Product.findOne({ _id: _id });
 
-export { createAProduct, getAllProducts, getProductPhoto, getSingleProduct };
+    // update data
+    product.name = name;
+    product.writer = writer
+    product.price = price;
+    product.discount = discount;
+    product.productLink = productLink;
+    product.description = description;
+
+    // UPADTE
+    const result = await Product.updateOne({ _id: _id }, { $set: product });
+    res.status(200).json({
+      status: "success",
+      result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: error.message,
+    });
+  }
+};
+
+const updateProductPhoto = async (req, res) => {
+  try {
+    const { photo } = req.files;
+
+    const _id = req.query.id;
+
+    const product = await Product.findOne({ _id: _id });
+
+    product.photo.data = fs.readFileSync(photo.path);
+    product.photo.contentType = photo.type;
+
+    const result = await Product.updateOne({ _id: _id }, { $set: product });
+
+    res.status(200).json({
+      status: "success",
+      result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: error.message,
+    });
+  }
+};
+
+const deleteProduct = async (req, res) => {
+  try {
+    const _id = req.query.id;
+
+    const result = await Product.deleteOne({ _id: _id });
+    res.status(200).json({
+      status: "success",
+      result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "fail",
+      message: error.message,
+    });
+  }
+};
+
+export {
+  createAProduct,
+  getAllProducts,
+  getProductPhoto,
+  getSingleProduct,
+  updateProduct,
+  updateProductPhoto,
+  deleteProduct,
+};
