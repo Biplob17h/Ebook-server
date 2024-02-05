@@ -7,6 +7,7 @@ import connectDB from "./config/db.js";
 import userRouter from "./routes/userRoute.js";
 import productRouter from "./routes/productRoutes.js";
 import fetch from "node-fetch";
+import orderRouter from "./routes/orderRoute.js";
 
 
 // APP
@@ -155,6 +156,7 @@ app.post("/api/orders/:orderID/capture", async (req, res) => {
 });
 
 // ROUTES
+app.use('/api/v1/order', orderRouter)
 app.use('/api/v1/user', userRouter)
 app.use('/api/v1/product', productRouter)
 
