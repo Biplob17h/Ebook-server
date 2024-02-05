@@ -22,6 +22,11 @@ const productSchema = mongoose.Schema({
     trim: true,
     minLength: [10, "Book description is too short"],
   },
+  writer: {
+    type: String,
+    trim: true,
+    required: true,
+  },
   productLink: {
     type: String,
   },
